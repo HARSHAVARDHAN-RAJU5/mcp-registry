@@ -1,0 +1,34 @@
+name: memanto
+image: mcp/memanto
+type: server
+meta:
+  category: ai
+  tags:
+    - memory
+    - ai
+    - agents
+about:
+  title: Memanto
+  description: Persistent semantic memory for AI agents. Remember facts, preferences and decisions, and recall them across sessions and tools with typed, searchable memory.
+  icon: https://avatars.githubusercontent.com/u/220075209?v=4
+source:
+  project: https://github.com/moorcheh-ai/memanto
+  commit: c3a5fe40762ad9f6e97e4eb595bd01e79cc8bb7e
+  directory: integrations/mcp
+config:
+  description: Configure your Moorcheh API key and the memory agent to use
+  secrets:
+    - name: memanto.moorcheh_api_key
+      env: MOORCHEH_API_KEY
+      example: <YOUR_MOORCHEH_API_KEY>
+  env:
+    - name: MEMANTO_DEFAULT_AGENT_ID
+      example: my-assistant
+      value: "{{memanto.agent_id}}"
+  parameters:
+    type: object
+    properties:
+      agent_id:
+        type: string
+    required:
+      - agent_id

@@ -1,0 +1,239 @@
+[
+  {
+    "name": "remember",
+    "description": "Save one durable piece of information to long-term memory so it is available in future sessions. Call this on your own, without waiting for the user to say 'remember', whenever:\n- the user states a rule or standing instruction ('never push without asking me', 'always use pnpm')\n- the user states a preference or makes a decision\n- a goal, deadline or commitment is agreed\n- you learn a stable fact about the user, the project or its setup\n- a bug fix, failed attempt or correction teaches a lesson worth keeping\nWrite one short, general statement ('Ask the user before any git push'), not a transcript. Skip small talk and one-off details. For important items, a quick `recall` first avoids duplicates. Content is capped at 10000 characters.",
+    "arguments": [
+      {
+        "name": "content",
+        "type": "string",
+        "desc": "The memory itself - one atomic statement. Max 10000 characters."
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "desc": "Semantic memory type. Use 'preference' for likes/styles, 'fact' for stable factual claims, 'decision' for choices the user has made, 'goal' for objectives, 'instruction' for explicit how-to directives, 'event' for things that happened, 'observation' for inferred behavior."
+      },
+      {
+        "name": "confidence",
+        "type": "number",
+        "desc": "How sure you are this is true (0.0-1.0). Use 1.0 only for things the user stated explicitly. 0.6-0.8 is a sensible default for inferred information."
+      },
+      {
+        "name": "provenance",
+        "type": "string",
+        "desc": "How this memory was obtained. 'explicit_statement' means the user said it; 'inferred' means you deduced it; 'observed' means you saw it during a tool call; 'corrected' means it overrides an earlier wrong memory."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "desc": "Short label (<= 100 chars). If omitted, derived from content.",
+        "optional": true
+      },
+      {
+        "name": "tags",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "desc": "Optional lowercase tag list for later filtering.",
+        "optional": true
+      },
+      {
+        "name": "source",
+        "type": "string",
+        "desc": "Who wrote this memory. Defaults to the connected MCP client (e.g. 'cursor', 'codex', 'claude-ai'), falling back to 'mcp-agent'. Up to 64 letters, digits, '.', '_', or '-'.",
+        "optional": true
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "name": "batch_remember",
+    "description": "Store many memories at once (up to 100). Use this when you have a list of independent facts to persist - e.g. extracting structured data from a document. For a single item, prefer `remember`.",
+    "arguments": [
+      {
+        "name": "memories",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "desc": "List of memory items. Each item requires 'content', 'type', 'confidence' (0.0-1.0), and 'provenance' (same allowed values as `remember`); 'title', 'tags', and 'source' are optional (missing source is attributed to the calling client). Max 100 items."
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "name": "recall",
+    "description": "Search long-term memory for relevant context (semantic search, top-N results). Call this on your own, without waiting to be asked:\n- at the start of a new task or topic, before writing code or running commands, to pick up the user's rules, preferences and earlier decisions\n- when the user refers to earlier work ('like last time', 'the bug we fixed')\n- before choosing a library, pattern or convention the user hasn't specified\n- before asking the user for something they may have told you before\nUse a natural-language query ('what are the user's rules for git?'), not keywords.",
+    "arguments": [
+      {
+        "name": "query",
+        "type": "string",
+        "desc": "Natural-language search query."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "desc": "Max number of memories to return (1-100).",
+        "optional": true
+      },
+      {
+        "name": "type",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "desc": "Optional type filter - e.g. ['preference'] to only retrieve user preferences.",
+        "optional": true
+      },
+      {
+        "name": "min_similarity",
+        "type": "number",
+        "desc": "Minimum similarity score 0-1. Applied by the search backend, so the top-N is filled with results that pass the threshold. Defaults to the server config value.",
+        "optional": true
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "name": "recall_recent",
+    "description": "Return the most recently stored memories (newest first). Use this to surface fresh context - e.g. 'what did we just decide?' - when you don't have a specific search query.",
+    "arguments": [
+      {
+        "name": "limit",
+        "type": "integer",
+        "desc": "Max number of memories to return.",
+        "optional": true
+      },
+      {
+        "name": "type",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "desc": "Optional type filter.",
+        "optional": true
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "name": "recall_as_of",
+    "description": "Point-in-time recall: return only memories that were known before the given timestamp. Use this when the user asks historical questions like 'what did we know on 2025-11-01?' or to reconstruct context at a previous moment.",
+    "arguments": [
+      {
+        "name": "as_of",
+        "type": "string",
+        "desc": "Cutoff timestamp. Accepts YYYY-MM-DD (interpreted as end of that day) or full ISO 8601 e.g. 2025-11-01T14:30:00Z."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "desc": "",
+        "optional": true
+      },
+      {
+        "name": "type",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "desc": "Optional type filter.",
+        "optional": true
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "name": "recall_changed_since",
+    "description": "Differential retrieval: return memories created or updated after the given timestamp. Use this for 'what's new since X?' or to catch up on activity between sessions.",
+    "arguments": [
+      {
+        "name": "since",
+        "type": "string",
+        "desc": "Lower-bound timestamp. Accepts YYYY-MM-DD (start of day) or full ISO 8601 e.g. 2025-11-01T00:00:00Z."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "desc": "",
+        "optional": true
+      },
+      {
+        "name": "type",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "desc": "Optional type filter.",
+        "optional": true
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  },
+  {
+    "name": "answer",
+    "description": "Ask a natural-language question and get an LLM-generated answer grounded ONLY in the agent's stored memories (RAG). Prefer this over `recall` when you need a synthesized answer rather than a ranked list, e.g. 'what did we decide about X?'. Returns the answer text plus the supporting memory sources.",
+    "arguments": [
+      {
+        "name": "question",
+        "type": "string",
+        "desc": "The question to answer."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "desc": "Number of context memories to retrieve. Defaults to server config.",
+        "optional": true
+      },
+      {
+        "name": "temperature",
+        "type": "number",
+        "desc": "LLM temperature. Defaults to server config.",
+        "optional": true
+      },
+      {
+        "name": "kiosk_mode",
+        "type": "boolean",
+        "desc": "If true, refuses to answer when no memory clears the similarity threshold (useful for strictly grounded applications). Defaults to the server config value.",
+        "optional": true
+      },
+      {
+        "name": "agent_id",
+        "type": "string",
+        "desc": "Memanto agent identifier the memory belongs to (defaults to 'docker-test').",
+        "optional": true
+      }
+    ]
+  }
+]
